@@ -11,7 +11,7 @@ const port = process.env.PORT || 4000; //port for serve
 app.use(express.json());
 app.use(cors());
 
-app.use("/v1/api/license", require("./routes/routes"));
+app.use("/v1/api/license/", require("./Routes/routes"));
 
 //server connection
 app.listen(port, () => {
