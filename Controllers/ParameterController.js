@@ -1,4 +1,4 @@
-require("dotenv").config();
+
 const { matchedData, validationResult } = require("express-validator");
 const tb_parameter = "parameters";
 const { insertData,selectData } = require("./HelperController");

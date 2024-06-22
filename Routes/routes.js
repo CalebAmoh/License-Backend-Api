@@ -4,6 +4,7 @@ const router = express.Router();
 const { addParam, getParam } = require("../Controllers/ParameterController");
 const { validatorResponse } = require("../middleware/ValidatorResponse");
 const validationRules = require("../middleware/RequestValidator");
+require("dotenv").config();
 
 
 // Route definition
