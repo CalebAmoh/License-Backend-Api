@@ -1,5 +1,8 @@
 //IMPORTS
 require("dotenv").config();
+const oracledb = require("oracledb");
+
+oracledb.initOracleClient({ libDir: "C:/instantclient_21_8" });
 const express = require("express");
 const cors = require("cors");
 

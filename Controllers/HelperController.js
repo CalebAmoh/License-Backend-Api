@@ -34,28 +34,61 @@ function insertData(data, tableName, callback) {
 			}
 		});
 	} catch (error) {
-		console.error("Error adding role:", error);
+		console.error("Error adding row:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
 	}
 }
 
-// Function to delete a record in MySQL table dynamically
-function selectData(tableName, condition, callback) {
+// Function to select records in MySQL table dynamically based on a condition
+function selectDataWithCondition(tableName, condition, callback) {
 	try {
 		//prepare select query
 		const selectRecord = `SELECT * from ${tableName} WHERE ${condition}`;
 
-		//execute the select query 
+		//execute the select query
 		connection.query(selectRecord, (error, results, fields) => {
 			callback({ status: "success", data: results });
 		});
 	} catch (error) {
-		console.error("Error adding role:", error);
+		console.error("Error selecting data:", error);
+		res.status(500).json({ result: "Internal server error", code: "500" });
+	}
+}
+
+// Function to select records in MySQL table dynamically without any conditions
+function selectData(tableName, condition, callback) {
+	try {
+		//prepare select query
+		const selectRecord = `SELECT * from ${tableName}`;
+
+		//execute the select query
+		connection.query(selectRecord, (error, results, fields) => {
+			callback({ status: "success", data: results });
+		});
+	} catch (error) {
+		console.error("Error selecting data:", error);
+		res.status(500).json({ result: "Internal server error", code: "500" });
+	}
+}
+
+// Function to select records in MySQL table dynamically based on your custom query
+function selectCustomData(query, callback) {
+	try {
+		//prepare select query
+		const selectRecord = query;
+		//execute the select query
+		connection.query(selectRecord, (error, results, fields) => {
+			callback({ status: "success", data: results });
+		});
+	} catch (error) {
+		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
 	}
 }
 
 module.exports = {
 	insertData,
-	selectData
+	selectDataWithCondition,
+	selectData,
+	selectCustomData
 };
