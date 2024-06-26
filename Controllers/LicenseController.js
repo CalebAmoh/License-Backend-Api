@@ -66,7 +66,7 @@ const generateLicense = async (req, res) => {
 			`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
 		);
 
-		// Log the raw data to see what it contains
+		// Log the raw data to see what it contains1
 		// console.log("Raw query result:", encryption1);
 		console.log("Raw encrypted value:", encryption1.rows[0]);
 		const resultString = encryption1.rows[0][0];
