@@ -143,8 +143,13 @@ const encryptData = async data => {
 		//convert object data to array
 		const modified_data = collect(data).toArray();
 
-		//connect to oracle db
-		const db = await connectOracle();
+		//create oracle connection
+		const db = await oracledb.getConnection({
+			user: user_oracle,
+			password: password_oracle,
+			connectString: connectString_oracle,
+			timeout: timeout_oracle
+		});
 
 		//bind database connection
 		const execute = util.promisify(db.execute).bind(db);
@@ -160,6 +165,7 @@ const encryptData = async data => {
 		return encrypted_value;
 	} catch (error) {
 		console.log(error);
+		return
 	}
 };
 

@@ -2,7 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const { addParam, getParam } = require("../Controllers/ParameterController");
-const { generateLicense,getBankDetails } = require("../Controllers/LicenseController");
+const {
+	generateLicense,
+	getBankDetails,
+	reactivateLicense,
+	ammendLicenseDetails
+} = require("../Controllers/LicenseController");
 const { validatorResponse } = require("../middleware/ValidatorResponse");
 const validationRules = require("../middleware/RequestValidator");
 require("dotenv").config();
@@ -15,6 +20,8 @@ router.get("/get-param",validationRules.selectParam,validatorResponse,getParam);
 
 //handles license activities
 router.post("/generate-license",validationRules.generateLicense,validatorResponse,generateLicense);
+router.post("/reactivate-license",validationRules.generateLicense,validatorResponse,reactivateLicense);
+router.post("/amend-license",validationRules.generateLicense,validatorResponse,ammendLicenseDetails);
 router.get("/get-bank-details",validationRules.selectBankDetails,validatorResponse,getBankDetails);
 
 router.all("*", (req, res) => {

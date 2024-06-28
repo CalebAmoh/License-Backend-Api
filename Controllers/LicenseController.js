@@ -74,7 +74,7 @@ const generateLicense = async (req, res) => {
 		// const encrypted_value = Buffer.from(encryption.rows[0][0]).toString("hex");
 
 		//encrypt data
-		const encrypted_value = encryptData(testArray);
+		const encrypted_value = await encryptData(testArray);
 
 		// let encryption1 = await execute(
 		// 	`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
@@ -85,6 +85,14 @@ const generateLicense = async (req, res) => {
 		// console.log("Raw encrypted value:", encryption1.rows[0]);
 		// const resultString = encryption1.rows[0][0];
 		// console.log(resultString);
+
+		// Check if encryption was successful
+		if (!encrypted_value) {
+			return res.status(500).json({
+				status: "500",
+				result: "Encryption failed"
+			});
+		}
 
 		/**
 			* insert data into table
@@ -165,7 +173,7 @@ const reactivateLicense = async (req, res) => {
 		//encrypt data
 		const encrypted_value = encryptData(license_details);
 
-		if (encrypted_value != NULL) {
+		if (encrypted_value) {
 			//update the expiry status of the already existing bank to expired
 			//select condition
 			const condition = `bank_id = ${bank_id}`;
@@ -218,6 +226,11 @@ const reactivateLicense = async (req, res) => {
 					});
 				}
 			});
+		} else {
+			return res.status(500).json({
+				status: "500",
+				result: "Encryption failed"
+			});
 		}
 	} catch (error) {
 		console.log(error);
@@ -225,8 +238,55 @@ const reactivateLicense = async (req, res) => {
 	}
 };
 
+//ammend license generation details
+const ammendLicenseDetails = async (req, res) => {
+
+	try {
+		//get data from request
+		const {
+			bank_id,
+			license_frequency_id,
+			license_type_id,
+			start_date,
+			end_date,
+			notification_start,
+			notification_frequency_id,
+			grace_period
+		} = req.body;
+
+		//update the bank license details
+		//condition for update
+		const condition = `bank_id = ${bank_id}`;
+		//data to update
+		const data = {
+			license_frequency_id,
+			license_type_id,
+			start_date,
+			end_date,
+			notification_start,
+			notification_frequency_id,
+			grace_period
+		};
+
+		//update the license details
+		updateData(data, tb_license, condition, result => {
+			//return a success message if insertion is successful else error message
+			if (result.status === "success") {
+				res.status(200).json({ result: "License details updated", code: "200" });
+			} else {
+				res.status(300).json({ result: "An error occured", code: "300" });
+			}
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ status: "500", result: "Contact system admin" });
+	}
+
+}
+
 module.exports = {
 	generateLicense,
 	getBankDetails,
-	reactivateLicense
+	reactivateLicense,
+	ammendLicenseDetails
 };
