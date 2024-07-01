@@ -43,14 +43,8 @@ const connectOracle = async () => {
 };
 
 // Function to insert data into a MySQL table dynamically
-function insertData(data, tableName, callback) {
-	try {
-		// Generate the insert statement dynamically
-		const columns = Object.keys(data).join(", ");
-		const values = Object.values(data).map(value => `"${value}"`).join(", ");
-		const insertQuery = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
-
-		// Execute the insert statement
+function insertData(data, tableName, type, callback) {
+	const executeInsert = insertQuery => {
 		connection.query(insertQuery, (error, results, fields) => {
 			if (error) {
 				console.log("Data error !", error);
@@ -60,9 +54,32 @@ function insertData(data, tableName, callback) {
 				callback({ status: "success", message: "data inserted" });
 			}
 		});
+	};
+
+	const generateInsertQuery = (data, tableName) => {
+		const columns = Object.keys(data).join(", ");
+		const values = Object.values(data).map(value => `"${value}"`).join(", ");
+		return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
+	};
+
+	try {
+		if (type === "main") {
+			const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+			connection.query(selectRecord, (error, results, fields) => {
+				if (results && results.length > 0) {
+					callback({ status: "error", message: "Bank ID already exists" });
+				} else {
+					const insertQuery = generateInsertQuery(data, tableName);
+					executeInsert(insertQuery);
+				}
+			});
+		} else {
+			const insertQuery = generateInsertQuery(data, tableName);
+			executeInsert(insertQuery);
+		}
 	} catch (error) {
 		console.error("Error adding row:", error);
-		res.status(500).json({ result: "Internal server error", code: "500" });
+		callback({ status: "error", message: "Internal server error" });
 	}
 }
 
@@ -143,13 +160,8 @@ const encryptData = async data => {
 		//convert object data to array
 		const modified_data = collect(data).toArray();
 
-		//create oracle connection
-		const db = await oracledb.getConnection({
-			user: user_oracle,
-			password: password_oracle,
-			connectString: connectString_oracle,
-			timeout: timeout_oracle
-		});
+		//connect to oracle db
+		const db = await connectOracle();
 
 		//bind database connection
 		const execute = util.promisify(db.execute).bind(db);
@@ -162,10 +174,37 @@ const encryptData = async data => {
 		// console.log(encryption.rows[0][0]);
 		const encrypted_value = Buffer.from(encryption.rows[0][0]).toString("hex");
 
+		let encryption1 = await execute(
+			`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
+		);
+
+		console.log(encryption1);
 		return encrypted_value;
 	} catch (error) {
 		console.log(error);
-		return
+		return;
+	}
+};
+
+/**
+ * Executes a SQL query and returns the result via a callback function.
+ * @param {string} query - The SQL query to execute.
+ * @param {function} callback - A callback function that takes an error and the result.
+ */
+const dbQuery = async (query, callback) => {
+	try {
+		connection.query(query, (error, results, fields) => {
+			if (error) {
+				console.log("Data error !", error);
+				callback({ status: "error", message: error.sqlMessage });
+			} else {
+				console.log("Data selected successfully!!");
+				callback({ status: "success", message: results });
+			}
+		});
+	} catch (error) {
+		console.error("Error adding row:", error);
+		res.status(500).json({ result: "Internal server error", code: "500" });
 	}
 };
 
@@ -175,5 +214,6 @@ module.exports = {
 	selectDataWithCondition,
 	selectData,
 	selectCustomData,
-	encryptData
+	encryptData,
+	dbQuery
 };

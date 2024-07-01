@@ -65,6 +65,12 @@ const getParam = async (req, res) => {
 	}
 };
 
+//update parameters
+const updateParam = async (req, res) => {
+	//get the code type and id from request
+	const { code_type, id } = req.body;
+}
+
 module.exports = {
 	addParam,
 	getParam
