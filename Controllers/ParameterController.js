@@ -72,42 +72,82 @@ const getParam = async (req, res) => {
 //this function will get all parameters for license generation form
 const getLicenseFormParameters = async (req, res) => {
 	try {
-		let bankParams = [];
-		// let licenseTypeParams = [];
-		// let licenseFrequencyParams = [];
-		// let notificationFrequencyParams = [];
+		let bankParams = []; //to hold all bank parameters
+		let licenseTypeParams = []; //to hold all license type parameters
+		let licenseFrequencyParams = []; //to hold all license frequency parameters
+		let notificationFrequencyParams = []; //to hold all notification frequency parameters
 
 		//select all bank parameters
+		await selectData(tb_parameter, "code_type = Bank", result => {
+			if (result.status === "success") {
+				bankParams = result.data;
+			} else {
+				res
+					.status(300)
+					.json({
+						result: "An error occured while querying banks",
+						code: "300"
+					});
+			}
+		});
+
+		//select all license type parameters
+		await selectData(tb_parameter, "code_type = LicenseType", result => {
+			if (result.status === "success") {
+				licenseTypeParams = result.data;
+			} else {
+				res
+					.status(300)
+					.json({
+						result: "An error occured while querying license types",
+						code: "300"
+					});
+			}
+		});
+
+		//select all license frequency parameters
 		await selectData(
 			tb_parameter,
-			"code_type = Bank",
+			"code_type = LicenseFrequency",
 			result => {
 				if (result.status === "success") {
-					console.log(result.data);
-					bankParams = result.data;
+					licenseFrequencyParams = result.data;
 				} else {
-					res.status(300).json({ result: "An error occured", code: "300" });
+					res
+						.status(300)
+						.json({
+							result: "An error occured while querying license frequencies",
+							code: "300"
+						});
 				}
 			}
 		);
-		return;
-		//select all license type parameters
-		const licenseTypeParams = await selectData(
-			tb_parameter,
-			"code_type = LicenseType"
-		);
-
-		//select all license frequency parameters
-		const licenseFrequencyParams = await selectData(
-			tb_parameter,
-			"code_type = LicenseFrequency"
-		);
 
 		//select all notification frequency parameters
-		const notificationFrequencyParams = await selectData(
+		await selectData(
 			tb_parameter,
-			"code_type = NotificationFrequency"
+			"code_type = NotificationFrequency",
+			result => {
+				if (result.status === "success") {
+					notificationFrequencyParams = result.data;
+				} else {
+					res
+						.status(300)
+						.json({
+							result: "An error occured while querying notification frequencies",
+							code: "300"
+						});
+				}
+			}
 		);
+
+		//return all parameters
+		res.status(200).json({
+			bankParams,
+			licenseTypeParams,
+			licenseFrequencyParams,
+			notificationFrequencyParams
+		});
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "500", result: "Contact system admin" });
