@@ -72,10 +72,10 @@ const getParam = async (req, res) => {
 //this function will get all parameters for license generation form
 const getLicenseFormParameters = async (req, res) => {
 	try {
-		let bankParams; //to hold all bank parameters
-		let licenseTypeParams; //to hold all license type parameters
-		let licenseFrequencyParams; //to hold all license frequency parameters
-		let notificationFrequencyParams; //to hold all notification frequency parameters
+		// let bankParams; //to hold all bank parameters
+		// let licenseTypeParams; //to hold all license type parameters
+		// let licenseFrequencyParams; //to hold all license frequency parameters
+		// let notificationFrequencyParams; //to hold all notification frequency parameters
 
 		//select all bank parameters
 		await selectData(tb_parameter, "code_type = Bank", result => {
