@@ -1,6 +1,10 @@
 const { matchedData, validationResult } = require("express-validator");
 const tb_parameter = "parameters";
-const { insertData, selectDataWithCondition } = require("./HelperController");
+const {
+	insertData,
+	selectDataWithCondition,
+	selectData
+} = require("./HelperController");
 
 /***********************************************************************************************************
  * handles all parameters in the system
@@ -68,29 +72,53 @@ const getParam = async (req, res) => {
 //this function will get all parameters for license generation form
 const getLicenseFormParameters = async (req, res) => {
 	try {
+		let bankParams = [];
+		// let licenseTypeParams = [];
+		// let licenseFrequencyParams = [];
+		// let notificationFrequencyParams = [];
+
 		//select all bank parameters
-		const bankParams = await selectData(tb_parameter, "code_type = Bank");
-		console.log(bankParams);return;
+		await selectData(
+			tb_parameter,
+			"code_type = Bank",
+			result => {
+				if (result.status === "success") {
+					console.log(result.data);
+					bankParams = result.data;
+				} else {
+					res.status(300).json({ result: "An error occured", code: "300" });
+				}
+			}
+		);
+		return;
 		//select all license type parameters
-		const licenseTypeParams = await selectData(tb_parameter, "code_type = LicenseType");
+		const licenseTypeParams = await selectData(
+			tb_parameter,
+			"code_type = LicenseType"
+		);
 
 		//select all license frequency parameters
-		const licenseFrequencyParams = await selectData(tb_parameter, "code_type = LicenseFrequency");
+		const licenseFrequencyParams = await selectData(
+			tb_parameter,
+			"code_type = LicenseFrequency"
+		);
 
 		//select all notification frequency parameters
-		const notificationFrequencyParams = await selectData(tb_parameter, "code_type = NotificationFrequency");
-
+		const notificationFrequencyParams = await selectData(
+			tb_parameter,
+			"code_type = NotificationFrequency"
+		);
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "500", result: "Contact system admin" });
 	}
-}
+};
 
 //update parameters
 const updateParam = async (req, res) => {
 	//get the code type and id from request
 	const { code_type, id } = req.body;
-}
+};
 
 module.exports = {
 	addParam,
