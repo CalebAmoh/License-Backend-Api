@@ -65,6 +65,27 @@ const getParam = async (req, res) => {
 	}
 };
 
+//this function will get all parameters for license generation form
+const getLicenseFormParameters = async (req, res) => {
+	try {
+		//select all bank parameters
+		const bankParams = await selectData(tb_parameter, "code_type = Bank");
+		console.log(bankParams);return;
+		//select all license type parameters
+		const licenseTypeParams = await selectData(tb_parameter, "code_type = LicenseType");
+
+		//select all license frequency parameters
+		const licenseFrequencyParams = await selectData(tb_parameter, "code_type = LicenseFrequency");
+
+		//select all notification frequency parameters
+		const notificationFrequencyParams = await selectData(tb_parameter, "code_type = NotificationFrequency");
+
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ status: "500", result: "Contact system admin" });
+	}
+}
+
 //update parameters
 const updateParam = async (req, res) => {
 	//get the code type and id from request
@@ -73,5 +94,6 @@ const updateParam = async (req, res) => {
 
 module.exports = {
 	addParam,
-	getParam
+	getParam,
+	getLicenseFormParameters
 };
