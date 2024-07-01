@@ -113,6 +113,7 @@ function selectDataWithCondition(tableName, condition, callback) {
 		//prepare select query
 		const selectRecord = `SELECT * from ${tableName} WHERE ${condition}`;
 
+		console.log("Select query with condition",selectRecord);
 		//execute the select query
 		connection.query(selectRecord, (error, results, fields) => {
 			callback({ status: "success", data: results });
@@ -123,8 +124,44 @@ function selectDataWithCondition(tableName, condition, callback) {
 	}
 }
 
+// Function to select records in MySQL table dynamically based on a condition
+function selectParaWithCondition(tableName, condition) {
+    return new Promise((resolve, reject) => {
+        try {
+            // Prepare select query
+            const selectRecord = `SELECT * FROM ${tableName} WHERE ${condition}`;
+            console.log("Select query with condition", selectRecord);
+
+            // Execute the select query
+            connection.query(selectRecord, (error, results) => {
+                if (error) {
+                    console.error("Error selecting data:", error);
+                    reject(error);
+                } else {
+                    resolve(results);
+                }
+            });
+        } catch (error) {
+            console.error("Error in selectParaWithCondition:", error);
+            reject(error);
+        }
+    });
+}
+
+// Example usage
+async function fetchData() {
+    try {
+        const tableName = 'your_table_name';
+        const condition = 'your_condition';
+        const data = await selectParaWithCondition(tableName, condition);
+        console.log('Data:', data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
 // Function to select records in MySQL table dynamically without any conditions
-function selectData(tableName, condition, callback) {
+function selectData(tableName, callback) {
 	try {
 		//prepare select query
 		const selectRecord = `SELECT * from ${tableName}`;
@@ -212,6 +249,7 @@ module.exports = {
 	insertData,
 	updateData,
 	selectDataWithCondition,
+	selectParaWithCondition,
 	selectData,
 	selectCustomData,
 	encryptData,
