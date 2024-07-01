@@ -74,7 +74,7 @@ const getParam = async (req, res) => {
 // Function to fetch parameters by code type
 async function fetchParametersByType(codeType) {
     const condition = `code_type = '${codeType}' and status = 'Active'`;
-    return selectParaWithCondition('tb_parameter', condition);
+    return selectParaWithCondition(tb_parameter, condition);
 }
 
 const getLicenseFormParameters = async (req, res) => {
