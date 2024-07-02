@@ -137,6 +137,7 @@ const reactivateLicense = async (req, res) => {
 
 		// Encrypt the formatted string
 		const encryptedValue = await encryptData(formattedString);
+
 		// If encryption fails, return a 500 error
 		if (!encryptedValue) {
 			return res
@@ -251,22 +252,32 @@ async function copyLicenseToHistory(bank_id) {
 					expired_status: 1 // Assuming you want to set expired_status to 1 for all entries
 				}));
 
+				console.log(insertData);
+
 				// Insert each row into the history table
 				for (const data of insertData) {
 					const insertQuery = `INSERT INTO tb_license_history (bank_id, license_frequency_id, license_type_id, start_date, end_date, notification_start, notification_frequency_id, grace_period, expired_status) VALUES ('${data.bank_id}', '${data.license_frequency_id}', '${data.license_type_id}', '${data.start_date}', '${data.end_date}', '${data.notification_start}', '${data.notification_frequency_id}', '${data.grace_period}', '${data.expired_status}')`;
-					dbQuery(insertQuery);
-					
+					dbQuery(insertQuery, result => {
+						if (result.status === "error") {
+							console.log(
+								"Error copying data to history table:",
+								result.message
+							);
+							return false;
+						} else {
+							return true;
+						}
+					});
 				}
 
-				console.log("Data copied to history table successfully.");
+				// console.log("Data copied to history table successfully.");
 			} else {
 				console.log("No data found for the given bank_id.");
 				return false;
 			}
 		});
-		
 	} catch (error) {
-		console.error("Error copying data to history table:", error);
+		console.error("Error copying data to history table:");
 	}
 }
 
