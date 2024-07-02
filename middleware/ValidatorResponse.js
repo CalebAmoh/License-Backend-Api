@@ -5,7 +5,7 @@ function validatorResponse(req, res, next) {
 	const result = validationResult(req);
 	if (!result.isEmpty()) {
 		console.log("Validation failed");
-		return res.status(400).json({ status: "400", result: result.array() });
+		return res.status(400).json({ status: "400", result: result.errors[0].msg });
 	}
 	console.log("Validation passed");
 	next(); // Call next() to move to the next middleware
