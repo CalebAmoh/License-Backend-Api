@@ -130,6 +130,8 @@ const reactivateLicense = async (req, res) => {
 			grace_period
 		} = req.body;
 
+		console.log(start_date);
+		console.log(end_date);
 		// Format request body into a string for encryption
 		const formattedString = Object.entries(req.body)
 			.map(([key, value]) => `${key}:${value}`)
@@ -149,6 +151,7 @@ const reactivateLicense = async (req, res) => {
 		const moved = copyLicenseToHistory(bank_id);
 
 		if (moved) {
+			console.log("inserting data into the main table")
 			// Insert the encrypted data into the database
 			insertData(
 				{
@@ -163,8 +166,9 @@ const reactivateLicense = async (req, res) => {
 					encrypted_value: encryptedValue
 				},
 				tb_license,
-				"main",
+				"reactivate",
 				result => {
+					console.log("what is the result",result)
 					res.status(result.status === "success" ? 200 : 300).json({
 						result:
 							result.status === "success"
@@ -237,7 +241,6 @@ async function copyLicenseToHistory(bank_id) {
 		// Select data from the main license table
 		const selectQuery = `SELECT * FROM tb_license WHERE bank_id = ${bank_id}`;
 		dbQuery(selectQuery, result => {
-			console.log(result.message.length);
 			if (result.message && result.message.length > 0) {
 				// Prepare data for insertion into the history table
 				const insertData = result.message.map(row => ({
@@ -252,7 +255,6 @@ async function copyLicenseToHistory(bank_id) {
 					expired_status: 1 // Assuming you want to set expired_status to 1 for all entries
 				}));
 
-				console.log(insertData);
 
 				// Insert each row into the history table
 				for (const data of insertData) {

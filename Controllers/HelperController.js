@@ -42,42 +42,81 @@ const connectOracle = async () => {
 	}
 };
 
-// Function to insert data into a MySQL table dynamically
+// Function to insert data into a specified table
 function insertData(data, tableName, type, callback) {
+	// Function to execute the insert query
 	const executeInsert = insertQuery => {
+		// Execute the query using the connection object
 		connection.query(insertQuery, (error, results, fields) => {
 			if (error) {
+				// Log and return error through callback if query fails
 				console.log("Data error !", error);
 				callback({ status: "error", message: error.sqlMessage });
 			} else {
+				// Log success and return success message through callback
 				console.log("Data inserted successfully!!");
 				callback({ status: "success", message: "data inserted" });
 			}
 		});
 	};
 
+	// Function to generate an insert query from the provided data
 	const generateInsertQuery = (data, tableName) => {
+		// Extract column names from data keys
 		const columns = Object.keys(data).join(", ");
+		// Map data values to a string format suitable for SQL query
 		const values = Object.values(data).map(value => `"${value}"`).join(", ");
+		// Return the formatted insert SQL query
 		return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
 	};
 
 	try {
+		// Check if the operation type is 'main'
 		if (type === "main") {
+			// Prepare a select query to check for existing bank_id
 			const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+
+			// Execute the select query
 			connection.query(selectRecord, (error, results, fields) => {
 				if (results && results.length > 0) {
+					// If bank_id exists, return an error through callback
 					callback({ status: "error", message: "Bank ID already exists" });
 				} else {
+					// If bank_id does not exist, generate and execute insert query
 					const insertQuery = generateInsertQuery(data, tableName);
 					executeInsert(insertQuery);
 				}
 			});
 		} else {
+			// if (type === "reactivate") {
+			// 	// Prepare a select query to check for existing bank_id
+			// 	const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+
+			// 	// Execute the select query
+			// 	connection.query(selectRecord, (error, results, fields) => {
+			// 		if (results && results.length > 0) {
+			// 			//delete from main
+			// 			const deleteRecord = `delete from ${tableName}WHERE bank_id = ${data.bank_id}`;
+
+			// 			connection.query(deleteRecord, (error, results,fields)
+
+			// 			callback({
+			// 				status: "error",
+			// 				message: "Bank ID already exists"
+			// 			});
+			// 		} else {
+			// 			// If bank_id does not exist, generate and execute insert query
+			// 			const insertQuery = generateInsertQuery(data, tableName);
+			// 			executeInsert(insertQuery);
+			// 		}
+			// 	});
+			// }
+			// For types other than 'main', directly generate and execute insert query
 			const insertQuery = generateInsertQuery(data, tableName);
 			executeInsert(insertQuery);
 		}
 	} catch (error) {
+		// Catch and log any errors during the process, return error through callback
 		console.error("Error adding row:", error);
 		callback({ status: "error", message: "Internal server error" });
 	}
@@ -113,7 +152,7 @@ function selectDataWithCondition(tableName, condition, callback) {
 		//prepare select query
 		const selectRecord = `SELECT * from ${tableName} WHERE ${condition}`;
 
-		console.log("Select query with condition",selectRecord);
+		console.log("Select query with condition", selectRecord);
 		//execute the select query
 		connection.query(selectRecord, (error, results, fields) => {
 			callback({ status: "success", data: results });
@@ -126,38 +165,26 @@ function selectDataWithCondition(tableName, condition, callback) {
 
 // Function to select records in MySQL table dynamically based on a condition
 function selectParaWithCondition(tableName, condition) {
-    return new Promise((resolve, reject) => {
-        try {
-            // Prepare select query
-            const selectRecord = `SELECT * FROM ${tableName} WHERE ${condition}`;
-            console.log("Select query with condition", selectRecord);
+	return new Promise((resolve, reject) => {
+		try {
+			// Prepare select query
+			const selectRecord = `SELECT * FROM ${tableName} WHERE ${condition}`;
+			console.log("Select query with condition", selectRecord);
 
-            // Execute the select query
-            connection.query(selectRecord, (error, results) => {
-                if (error) {
-                    console.error("Error selecting data:", error);
-                    reject(error);
-                } else {
-                    resolve(results);
-                }
-            });
-        } catch (error) {
-            console.error("Error in selectParaWithCondition:", error);
-            reject(error);
-        }
-    });
-}
-
-// Example usage
-async function fetchData() {
-    try {
-        const tableName = 'your_table_name';
-        const condition = 'your_condition';
-        const data = await selectParaWithCondition(tableName, condition);
-        console.log('Data:', data);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
+			// Execute the select query
+			connection.query(selectRecord, (error, results) => {
+				if (error) {
+					console.error("Error selecting data:", error);
+					reject(error);
+				} else {
+					resolve(results);
+				}
+			});
+		} catch (error) {
+			console.error("Error in selectParaWithCondition:", error);
+			reject(error);
+		}
+	});
 }
 
 // Function to select records in MySQL table dynamically without any conditions
@@ -211,11 +238,11 @@ const encryptData = async data => {
 		// console.log(encryption.rows[0][0]);
 		const encrypted_value = Buffer.from(encryption.rows[0][0]).toString("hex");
 
-		let encryption1 = await execute(
-			`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
-		);
+		// let encryption1 = await execute(
+		// 	`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
+		// );
 
-		console.log(encryption1);
+		// console.log(encryption1);
 		return encrypted_value;
 	} catch (error) {
 		console.log(error);
