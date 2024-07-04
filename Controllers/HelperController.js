@@ -43,83 +43,55 @@ const connectOracle = async () => {
 };
 
 // Function to insert data into a specified table
-function insertData(data, tableName, type, callback) {
-	// Function to execute the insert query
-	const executeInsert = insertQuery => {
-		// Execute the query using the connection object
-		connection.query(insertQuery, (error, results, fields) => {
-			if (error) {
-				// Log and return error through callback if query fails
-				console.log("Data error !", error);
-				callback({ status: "error", message: error.sqlMessage });
-			} else {
-				// Log success and return success message through callback
-				console.log("Data inserted successfully!!");
-				callback({ status: "success", message: "data inserted" });
-			}
-		});
-	};
+async function insertData(data, tableName, type) {
+    // Function to execute the insert query
+    const executeInsert = async insertQuery => {
+        try {
+            const [results] = await query(insertQuery);
+            // console.log("Data inserted successfully!!");
+            return { status: "success", message: "data inserted" };
+        } catch (error) {
+            console.log("Data error !", error);
+            return { status: "error", message: error.sqlMessage };
+        }
+    };
 
-	// Function to generate an insert query from the provided data
-	const generateInsertQuery = (data, tableName) => {
-		// Extract column names from data keys
-		const columns = Object.keys(data).join(", ");
-		// Map data values to a string format suitable for SQL query
-		const values = Object.values(data).map(value => `"${value}"`).join(", ");
-		// Return the formatted insert SQL query
-		return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
-	};
+    // Function to generate an insert query from the provided data
+    const generateInsertQuery = (data, tableName) => {
+        const columns = Object.keys(data).join(", ");
+        const values = Object.values(data).map(value => `"${value}"`).join(", ");
+        return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
+    };
 
-	try {
-		// Check if the operation type is 'main'
-		if (type === "main") {
-			// Prepare a select query to check for existing bank_id
-			const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+    // Wrap connection.query in a Promise
+    const query = (sql) => new Promise((resolve, reject) => {
+        connection.query(sql, (error, results, fields) => {
+            if (error) reject(error);
+            else resolve([results, fields]);
+        });
+    });
 
-			// Execute the select query
-			connection.query(selectRecord, (error, results, fields) => {
-				if (results && results.length > 0) {
-					// If bank_id exists, return an error through callback
-					callback({ status: "error", message: "Bank ID already exists" });
-				} else {
-					// If bank_id does not exist, generate and execute insert query
-					const insertQuery = generateInsertQuery(data, tableName);
-					executeInsert(insertQuery);
-				}
-			});
-		} else {
-			// if (type === "reactivate") {
-			// 	// Prepare a select query to check for existing bank_id
-			// 	const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+    try {
+        if (type === "main" || type === "reactivate") {
+            const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+            const [selectResults] = await query(selectRecord);
 
-			// 	// Execute the select query
-			// 	connection.query(selectRecord, (error, results, fields) => {
-			// 		if (results && results.length > 0) {
-			// 			//delete from main
-			// 			const deleteRecord = `delete from ${tableName}WHERE bank_id = ${data.bank_id}`;
+            if (selectResults && selectResults.length > 0) {
+                if (type === "reactivate") {
+                    const deleteRecord = `DELETE FROM ${tableName} WHERE bank_id = ${data.bank_id}`;
+                    await query(deleteRecord);
+                } else {
+                    return { status: "error", message: "Bank ID already exists" };
+                }
+            }
+        }
 
-			// 			connection.query(deleteRecord, (error, results,fields)
-
-			// 			callback({
-			// 				status: "error",
-			// 				message: "Bank ID already exists"
-			// 			});
-			// 		} else {
-			// 			// If bank_id does not exist, generate and execute insert query
-			// 			const insertQuery = generateInsertQuery(data, tableName);
-			// 			executeInsert(insertQuery);
-			// 		}
-			// 	});
-			// }
-			// For types other than 'main', directly generate and execute insert query
-			const insertQuery = generateInsertQuery(data, tableName);
-			executeInsert(insertQuery);
-		}
-	} catch (error) {
-		// Catch and log any errors during the process, return error through callback
-		console.error("Error adding row:", error);
-		callback({ status: "error", message: "Internal server error" });
-	}
+        const insertQuery = generateInsertQuery(data, tableName);
+        return await executeInsert(insertQuery);
+    } catch (error) {
+        console.error("Error adding row:", error);
+        return { status: "error", message: "Internal server error" };
+    }
 }
 
 // Function to update data MySQL table dynamically
@@ -136,13 +108,14 @@ function updateData(data, tableName, condition, callback) {
 				console.log("Data error !", error);
 				callback({ status: "error", message: error.sqlMessage });
 			} else {
-				console.log("Data inserted successfully!!");
+				// console.log("Data inserted successfully!!");
 				callback({ status: "success", message: "data inserted" });
 			}
 		});
 	} catch (error) {
 		console.error("Error adding row:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
+		return
 	}
 }
 
@@ -160,6 +133,7 @@ function selectDataWithCondition(tableName, condition, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
+		return
 	}
 }
 
@@ -200,6 +174,7 @@ function selectData(tableName, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
+		return
 	}
 }
 
@@ -215,6 +190,7 @@ function selectCustomData(query, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
+		return
 	}
 }
 
@@ -269,6 +245,7 @@ const dbQuery = async (query, callback) => {
 	} catch (error) {
 		console.error("Error adding row:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
+		return
 	}
 };
 

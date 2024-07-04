@@ -61,7 +61,7 @@ const generateLicense = async (req, res) => {
 				.json({ status: "500", result: "Encryption failed" });
 
 		//insert the encrypted data into the database
-		insertData(
+		const result = await insertData(
 			{
 				bank_id,
 				license_frequency_id,
@@ -74,21 +74,19 @@ const generateLicense = async (req, res) => {
 				encrypted_value
 			},
 			tb_license,
-			"main",
-			result => {
-				res.status(result.status === "success" ? 200 : 300).json({
-					result:
-						result.status === "success"
-							? "Encryption successful"
-							: result.message,
-					data: result.status === "success" ? encrypted_value : undefined,
-					code: result.status === "success" ? "200" : "300"
-				});
-			}
+			"main"
 		);
+
+		res.status(result.status === "success" ? 200 : 300).json({
+			result:
+				result.status === "success" ? "Encryption successful" : result.message,
+			data: result.status === "success" ? encrypted_value : undefined,
+			code: result.status === "success" ? "200" : "300"
+		});
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "500", result: "Contact system admin" });
+		return;
 	}
 };
 
@@ -107,10 +105,12 @@ const getBankDetails = async (req, res) => {
 				data: result.status === "success" ? result.data : undefined,
 				code: result.status === "success" ? "200" : "300"
 			});
+			return;
 		});
 	} catch (error) {
 		console.log(error);
 		res.satus(500).json({ status: "500", result: "Contact system admin" });
+		return;
 	}
 };
 
@@ -130,8 +130,6 @@ const reactivateLicense = async (req, res) => {
 			grace_period
 		} = req.body;
 
-		console.log(start_date);
-		console.log(end_date);
 		// Format request body into a string for encryption
 		const formattedString = Object.entries(req.body)
 			.map(([key, value]) => `${key}:${value}`)
@@ -151,9 +149,8 @@ const reactivateLicense = async (req, res) => {
 		const moved = copyLicenseToHistory(bank_id);
 
 		if (moved) {
-			console.log("inserting data into the main table")
 			// Insert the encrypted data into the database
-			insertData(
+			const result = await insertData(
 				{
 					bank_id,
 					license_frequency_id,
@@ -166,26 +163,26 @@ const reactivateLicense = async (req, res) => {
 					encrypted_value: encryptedValue
 				},
 				tb_license,
-				"reactivate",
-				result => {
-					console.log("what is the result",result)
-					res.status(result.status === "success" ? 200 : 300).json({
-						result:
-							result.status === "success"
-								? "Encryption successful"
-								: result.message,
-						data: result.status === "success" ? encryptedValue : undefined,
-						code: result.status === "success" ? "200" : "300"
-					});
-				}
+				"reactivate"
 			);
+
+			res.status(result.status === "success" ? 200 : 300).json({
+				result:
+					result.status === "success"
+						? "Encryption successful"
+						: result.message,
+				data: result.status === "success" ? encryptedValue : undefined,
+				code: result.status === "success" ? "200" : "300"
+			});
 		} else {
 			res.status(300).json({ result: "An error occured", code: "300" });
+			return;
 		}
 	} catch (error) {
 		// Log any errors and return a 500 status
 		console.log(error);
 		res.status(500).json({ status: "500", result: "Contact admin" });
+		return;
 	}
 };
 
@@ -225,13 +222,16 @@ const ammendLicenseDetails = async (req, res) => {
 				res
 					.status(200)
 					.json({ result: "License details updated", code: "200" });
+				return;
 			} else {
 				res.status(300).json({ result: "An error occured", code: "300" });
+				return;
 			}
 		});
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "500", result: "Contact system admin" });
+		return;
 	}
 };
 
@@ -242,29 +242,42 @@ async function copyLicenseToHistory(bank_id) {
 		const selectQuery = `SELECT * FROM tb_license WHERE bank_id = ${bank_id}`;
 		dbQuery(selectQuery, result => {
 			if (result.message && result.message.length > 0) {
+				const dd = new Date(result.message[0].start_date);
+				// Format the date as "YYYY-MM-DD"
+				const customFormattedDate = `${dd.getFullYear()}-${String(
+					dd.getMonth() + 1
+				).padStart(2, "0")}-${String(dd.getDate()).padStart(2, "0")}`;
+				// console.log("date log", customFormattedDate);
+
 				// Prepare data for insertion into the history table
 				const insertData = result.message.map(row => ({
 					bank_id: row.bank_id,
 					license_frequency_id: row.license_frequency_id,
 					license_type_id: row.license_type_id,
-					start_date: row.start_date,
-					end_date: row.end_date,
+					start_date: `${row.start_date.getFullYear()}-${String(
+						row.start_date.getMonth() + 1
+					).padStart(2, "0")}-${String(row.start_date.getDate()).padStart(
+						2,
+						"0"
+					)}`,
+					end_date: `${row.end_date.getFullYear()}-${String(
+						row.end_date.getMonth() + 1
+					).padStart(2, "0")}-${String(row.end_date.getDate()).padStart(
+						2,
+						"0"
+					)}`,
 					notification_start: row.notification_start,
 					notification_frequency_id: row.notification_frequency_id,
 					grace_period: row.grace_period,
 					expired_status: 1 // Assuming you want to set expired_status to 1 for all entries
 				}));
 
-
 				// Insert each row into the history table
 				for (const data of insertData) {
 					const insertQuery = `INSERT INTO tb_license_history (bank_id, license_frequency_id, license_type_id, start_date, end_date, notification_start, notification_frequency_id, grace_period, expired_status) VALUES ('${data.bank_id}', '${data.license_frequency_id}', '${data.license_type_id}', '${data.start_date}', '${data.end_date}', '${data.notification_start}', '${data.notification_frequency_id}', '${data.grace_period}', '${data.expired_status}')`;
+					// console.log("log the insert query", insertQuery);
 					dbQuery(insertQuery, result => {
 						if (result.status === "error") {
-							console.log(
-								"Error copying data to history table:",
-								result.message
-							);
 							return false;
 						} else {
 							return true;
@@ -274,7 +287,6 @@ async function copyLicenseToHistory(bank_id) {
 
 				// console.log("Data copied to history table successfully.");
 			} else {
-				console.log("No data found for the given bank_id.");
 				return false;
 			}
 		});

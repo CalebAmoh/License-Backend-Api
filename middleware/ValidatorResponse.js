@@ -7,7 +7,7 @@ function validatorResponse(req, res, next) {
 		console.log("Validation failed");
 		return res.status(400).json({ status: "400", result: result.errors[0].msg });
 	}
-	console.log("Validation passed");
+	// console.log("Validation passed");
 	next(); // Call next() to move to the next middleware
 }
 

@@ -25,20 +25,22 @@ const addParam = async (req, res) => {
 			* insert data into table
       * helper.insertData(@dataParam->the data to be inserted, @tableParam->table to insert data, @result->result from insert)
       */
-		insertData({ code_type, code_desc, status }, tb_parameter, result => {
-			//return a success message if insertion is successful else error message
-			if (result.status === "success") {
-				res.status(200).json({
-					result: "Data inserted",
-					code: "200"
-				});
-			} else {
-				res.status(300).json({
-					result: "An error occured",
-					code: "300"
-				});
-			}
-		});
+		const result = await insertData(
+			{ code_type, code_desc, status },
+			tb_parameter
+		);
+		//return a success message if insertion is successful else error message
+		if (result.status === "success") {
+			res.status(200).json({
+				result: "Data inserted",
+				code: "200"
+			});
+		} else {
+			res.status(300).json({
+				result: "An error occured",
+				code: "300"
+			});
+		}
 	} catch (error) {
 		console.error("Error:", error.message);
 		res.status(400).json({ status: "400", errors: error.message });
@@ -70,34 +72,44 @@ const getParam = async (req, res) => {
 	}
 };
 
+//get all parameter types from db
+
 //this function will get all parameters for license generation form
 // Function to fetch parameters by code type
 async function fetchParametersByType(codeType) {
-    const condition = `code_type = '${codeType}' and status = 'Active'`;
-    return selectParaWithCondition(tb_parameter, condition);
+	const condition = `code_type = '${codeType}' and status = 'Active'`;
+	return selectParaWithCondition(tb_parameter, condition);
 }
 
 const getLicenseFormParameters = async (req, res) => {
-    try {
-        // Define all code types
-        const codeTypes = ['Bank', 'LicenseType', 'LicenseFrequency', 'NotificationFrequency'];
+	try {
+		// Define all code types
+		const codeTypes = [
+			"Bank",
+			"LicenseType",
+			"LicenseFrequency",
+			"NotificationFrequency"
+		];
 
-        // Fetch all parameters concurrently
-        const [bankParams, licenseTypeParams, licenseFrequencyParams, notificationFrequencyParams] = await Promise.all(
-            codeTypes.map(type => fetchParametersByType(type))
-        );
+		// Fetch all parameters concurrently
+		const [
+			bankParams,
+			licenseTypeParams,
+			licenseFrequencyParams,
+			notificationFrequencyParams
+		] = await Promise.all(codeTypes.map(type => fetchParametersByType(type)));
 
-        // Return all parameters
-        res.status(200).json({
-            bankParams,
-            licenseTypeParams,
-            licenseFrequencyParams,
-            notificationFrequencyParams
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ status: "500", result: "Contact system admin" });
-    }
+		// Return all parameters
+		res.status(200).json({
+			bankParams,
+			licenseTypeParams,
+			licenseFrequencyParams,
+			notificationFrequencyParams
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ status: "500", result: "Contact system admin" });
+	}
 };
 
 //update parameters
