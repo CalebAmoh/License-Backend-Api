@@ -72,7 +72,25 @@ const getParam = async (req, res) => {
 	}
 };
 
-//get all parameter types from db
+//get all parameter types from parameters table
+const getAllParam = async (req, res) => {
+	try {
+
+		//call the selectdata helper function to get records from db
+		selectData(tb_parameter, result => {
+			//return a success message if insertion is successful else error message
+			if (result.status === "success") {
+				console.log(result);
+				res.status(200).json({ result: result.data, code: "200" });
+			} else {
+				res.status(300).json({ result: "An error occured", code: "300" });
+			}
+		});
+	} catch (error) {
+		console.error("Error:", error.message);
+		res.status(400).json({ status: "400", errors: error.message });
+	}
+};
 
 //this function will get all parameters for license generation form
 // Function to fetch parameters by code type
@@ -121,5 +139,6 @@ const updateParam = async (req, res) => {
 module.exports = {
 	addParam,
 	getParam,
-	getLicenseFormParameters
+	getLicenseFormParameters,
+	getAllParam
 };
