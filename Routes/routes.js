@@ -5,7 +5,8 @@ const {
 	addParam,
 	getParam,
 	getLicenseFormParameters,
-	getAllParam
+	getAllParam,
+	updateParam
 } = require("../Controllers/ParameterController");
 const {
 	generateLicense,
@@ -21,6 +22,7 @@ require("dotenv").config();
 
 //handles paramater activities
 router.post("/add-param",validationRules.addParam,validatorResponse,addParam);
+router.put("/update-param",validationRules.updateParam,validatorResponse,updateParam);
 router.get("/get-param",validationRules.selectParam,validatorResponse,getParam);
 router.get("/get-all-param", getAllParam);
 router.get("/get-license-parameters",getLicenseFormParameters);

@@ -27,6 +27,17 @@ const validationRules = {
 		check("status").notEmpty().withMessage("status is required")
 	],
 
+	//validation for updating parameters to parameters table
+	updateParam: [
+		check("code_type")
+			.notEmpty()
+			.isLength({ max: 24 })
+			.withMessage(
+				"code_type is required and length must be less than 24 characters"
+			),
+		check("id").notEmpty().withMessage("id is required"),
+		check("status").notEmpty().withMessage("status is required")
+	],
 	//validation for selecting parameters from tb_parameters
 	selectParam: [
 		check("code_type").trim().notEmpty().withMessage("code type is required")

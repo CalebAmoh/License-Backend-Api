@@ -4,7 +4,8 @@ const {
 	insertData,
 	selectDataWithCondition,
 	selectParaWithCondition,
-	selectData
+	selectData,
+	updateData
 } = require("./HelperController");
 
 /***********************************************************************************************************
@@ -134,11 +135,25 @@ const getLicenseFormParameters = async (req, res) => {
 const updateParam = async (req, res) => {
 	//get the code type and id from request
 	const { code_type, id } = req.body;
+
+	//update condition
+	const condition = `code_type = '${code_type}' AND id = ${id}`;
+
+	//call the updateData helper function to update records in db
+	updateData(req.body, tb_parameter, condition, result => {
+		//return a success message if insertion is successful else error message
+		if (result.status === "success") {
+			res.status(200).json({ result: "Data updated", code: "200" });
+		} else {
+			res.status(300).json({ result: "An error occured", code: "300" });
+		}
+	});
 };
 
 module.exports = {
 	addParam,
 	getParam,
 	getLicenseFormParameters,
-	getAllParam
+	getAllParam,
+	updateParam
 };
