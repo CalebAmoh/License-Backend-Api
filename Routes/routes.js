@@ -50,7 +50,7 @@ router.post(
 	reactivateLicense
 );
 router.post(
-	"/amend-license",
+	"/amend-license-details",
 	validationRules.generateLicense,
 	validatorResponse,
 	ammendLicenseDetails

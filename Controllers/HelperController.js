@@ -96,27 +96,26 @@ async function insertData(data, tableName, type) {
 
 // Function to update data MySQL table dynamically
 function updateData(data, tableName, condition, callback) {
-	try {
-		// Generate the insert statement dynamically
-		const columns = Object.keys(data).join(", ");
-		const values = Object.values(data).map(value => `"${value}"`).join(", ");
-		const updateQuery = `UPDATE ${tableName} set ${data} where ${condition}`;
+    try {
+        // Generate the update statement dynamically
+        const updateParts = Object.keys(data).map(key => `${key} = ?`).join(", ");
+        const values = Object.values(data);
+        const updateQuery = `UPDATE ${tableName} SET ${updateParts} WHERE ${condition}`;
 
-		// Execute the insert statement
-		connection.query(updateQuery, (error, results, fields) => {
-			if (error) {
-				console.log("Data error !", error);
-				callback({ status: "error", message: error.sqlMessage });
-			} else {
-				// console.log("Data inserted successfully!!");
-				callback({ status: "success", message: "data inserted" });
-			}
-		});
-	} catch (error) {
-		console.error("Error adding row:", error);
-		res.status(500).json({ result: "Internal server error", code: "500" });
-		return
-	}
+        // Execute the update statement using parameterized query for safety
+        connection.query(updateQuery, values, (error, results, fields) => {
+            if (error) {
+                console.log("Data error !", error);
+                callback({ status: "error", message: error.sqlMessage });
+            } else {
+                callback({ status: "success", message: "data updated" }); // Corrected message
+            }
+        });
+    } catch (error) {
+        console.error("Error updating row:", error);
+        // Since `res` is not available, you might need to adjust error handling here
+        callback({ status: "error", message: "Internal server error" });
+    }
 }
 
 // Function to select records in MySQL table dynamically based on a condition

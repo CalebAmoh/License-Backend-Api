@@ -235,6 +235,8 @@ const ammendLicenseDetails = async (req, res) => {
 	}
 };
 
+
+
 //moves data from the main license table to the history table
 async function copyLicenseToHistory(bank_id) {
 	try {
