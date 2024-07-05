@@ -30,7 +30,7 @@ router.get("/get-license-parameters",getLicenseFormParameters);
 //handles license activities
 router.post("/generate-license",validationRules.generateLicense,validatorResponse,generateLicense);
 router.post("/reactivate-license",validationRules.generateLicense,validatorResponse,reactivateLicense);
-router.post("/amend-license-details",validationRules.generateLicense,validatorResponse,ammendLicenseDetails);
+router.put("/amend-license-details",validationRules.generateLicense,validatorResponse,ammendLicenseDetails);
 router.get("/get-bank-details",validationRules.selectBankDetails,validatorResponse,getBankDetails);
 
 router.all("*", (req, res) => {
