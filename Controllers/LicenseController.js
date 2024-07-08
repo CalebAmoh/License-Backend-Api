@@ -95,7 +95,7 @@ const getBankDetails = async (req, res) => {
 	try {
 		//select the current license details of the bank
 		const query = `select bank_id,(select code_desc from parameters where id = bank_id) as bank_desc,license_frequency_id,(select code_desc from parameters where id = license_frequency_id) license_frequency,license_type_id,(select code_desc from parameters where id = license_type_id) license_type,start_date,end_date,notification_start,notification_frequency_id,(select code_desc from parameters where id = notification_frequency_id) notification_frequency from tb_license where bank_id = ${req
-			.query.bank_id} and expired_status = 1`;
+			.query.bank_id} and expired_status = 0`;
 
 		//select all the license details related to the bank
 		selectCustomData(query, result => {
