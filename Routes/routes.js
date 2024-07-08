@@ -31,7 +31,7 @@ router.get("/get-license-parameters",getLicenseFormParameters);
 router.post("/generate-license",validationRules.generateLicense,validatorResponse,generateLicense);
 router.post("/reactivate-license",validationRules.generateLicense,validatorResponse,reactivateLicense);
 router.put("/amend-license-details",validationRules.generateLicense,validatorResponse,ammendLicenseDetails);
-router.get("/get-bank-details",validationRules.selectBankDetails,validatorResponse,getBankDetails);
+router.post("/get-bank-details",validationRules.selectBankDetails,validatorResponse,getBankDetails);
 
 router.all("*", (req, res) => {
 	res.status(403).json({ code: "404", message: "route not found" });
