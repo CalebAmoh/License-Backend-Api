@@ -44,78 +44,79 @@ const connectOracle = async () => {
 
 // Function to insert data into a specified table
 async function insertData(data, tableName, type) {
-    // Function to execute the insert query
-    const executeInsert = async insertQuery => {
-        try {
-            const [results] = await query(insertQuery);
-            // console.log("Data inserted successfully!!");
-            return { status: "success", message: "data inserted" };
-        } catch (error) {
-            console.log("Data error !", error);
-            return { status: "error", message: error.sqlMessage };
-        }
-    };
+	// Function to execute the insert query
+	const executeInsert = async insertQuery => {
+		try {
+			const [results] = await query(insertQuery);
+			// console.log("Data inserted successfully!!");
+			return { status: "success", message: "data inserted" };
+		} catch (error) {
+			console.log("Data error !", error);
+			return { status: "error", message: error.sqlMessage };
+		}
+	};
 
-    // Function to generate an insert query from the provided data
-    const generateInsertQuery = (data, tableName) => {
-        const columns = Object.keys(data).join(", ");
-        const values = Object.values(data).map(value => `"${value}"`).join(", ");
-        return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
-    };
+	// Function to generate an insert query from the provided data
+	const generateInsertQuery = (data, tableName) => {
+		const columns = Object.keys(data).join(", ");
+		const values = Object.values(data).map(value => `"${value}"`).join(", ");
+		return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
+	};
 
-    // Wrap connection.query in a Promise
-    const query = (sql) => new Promise((resolve, reject) => {
-        connection.query(sql, (error, results, fields) => {
-            if (error) reject(error);
-            else resolve([results, fields]);
-        });
-    });
+	// Wrap connection.query in a Promise
+	const query = sql =>
+		new Promise((resolve, reject) => {
+			connection.query(sql, (error, results, fields) => {
+				if (error) reject(error);
+				else resolve([results, fields]);
+			});
+		});
 
-    try {
-        if (type === "main" || type === "reactivate") {
-            const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
-            const [selectResults] = await query(selectRecord);
+	try {
+		if (type === "main" || type === "reactivate") {
+			const selectRecord = `SELECT * from ${tableName} WHERE bank_id = ${data.bank_id}`;
+			const [selectResults] = await query(selectRecord);
 
-            if (selectResults && selectResults.length > 0) {
-                if (type === "reactivate") {
-                    const deleteRecord = `DELETE FROM ${tableName} WHERE bank_id = ${data.bank_id}`;
-                    await query(deleteRecord);
-                } else {
-                    return { status: "error", message: "Bank ID already exists" };
-                }
-            }
-        }
+			if (selectResults && selectResults.length > 0) {
+				if (type === "reactivate") {
+					const deleteRecord = `DELETE FROM ${tableName} WHERE bank_id = ${data.bank_id}`;
+					await query(deleteRecord);
+				} else {
+					return { status: "error", message: "Bank ID already exists" };
+				}
+			}
+		}
 
-        const insertQuery = generateInsertQuery(data, tableName);
-        return await executeInsert(insertQuery);
-    } catch (error) {
-        console.error("Error adding row:", error);
-        return { status: "error", message: "Internal server error" };
-    }
+		const insertQuery = generateInsertQuery(data, tableName);
+		return await executeInsert(insertQuery);
+	} catch (error) {
+		console.error("Error adding row:", error);
+		return { status: "error", message: "Internal server error" };
+	}
 }
 
 // Function to update data MySQL table dynamically
 function updateData(data, tableName, condition, callback) {
-    try {
-        // Generate the update statement dynamically
-        const updateParts = Object.keys(data).map(key => `${key} = ?`).join(", ");
-        const values = Object.values(data);
-        const updateQuery = `UPDATE ${tableName} SET ${updateParts} WHERE ${condition}`;
+	try {
+		// Generate the update statement dynamically
+		const updateParts = Object.keys(data).map(key => `${key} = ?`).join(", ");
+		const values = Object.values(data);
+		const updateQuery = `UPDATE ${tableName} SET ${updateParts} WHERE ${condition}`;
 
-        // Execute the update statement using parameterized query for safety
-        connection.query(updateQuery, values, (error, results, fields) => {
-            if (error) {
-                console.log("Data error !", error);
-                callback({ status: "error", message: error.sqlMessage });
-            } else {
-                callback({ status: "success", message: "data updated" }); // Corrected message
-            }
-        });
-    } catch (error) {
-        console.error("Error updating row:", error);
-        // Since `res` is not available, you might need to adjust error handling here
-        callback({ status: "error", message: "Internal server error" });
-    }
+		// Execute the update statement using parameterized query for safety
+		connection.query(updateQuery, values, (error, results, fields) => {
+			if (error) {
+				console.log("Data error !", error);
+				callback({ status: "error", message: error.sqlMessage });
+			} else {
+				callback({ status: "success", message: "data updated" }); // Corrected message
+			}
+		});
+	} catch (error) {
+		console.error("Error updating row:", error);
+		// Since `res` is not available, you might need to adjust error handling here
+		callback({ status: "error", message: "Internal server error" });
+	}
 }
 
 // Function to select records in MySQL table dynamically based on a condition
@@ -132,7 +133,7 @@ function selectDataWithCondition(tableName, condition, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
-		return
+		return;
 	}
 }
 
@@ -173,7 +174,7 @@ function selectData(tableName, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
-		return
+		return;
 	}
 }
 
@@ -189,7 +190,7 @@ function selectCustomData(query, callback) {
 	} catch (error) {
 		console.error("Error selecting data:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
-		return
+		return;
 	}
 }
 
@@ -207,14 +208,14 @@ const encryptData = async data => {
 
 		//execute the query1
 		let encryption = await execute(
-			`select CBXDMX.pkg_toolkit_modified.fnen('${modified_data}','${encrypt_key}') as encrypted from dual`
+			`select CBXDMX.pkg_cryption_tools.fnen('${modified_data}','${encrypt_key}') as encrypted from dual`
 		);
 
 		// console.log(encryption.rows[0][0]);
 		const encrypted_value = Buffer.from(encryption.rows[0][0]).toString("hex");
 
 		// let encryption1 = await execute(
-		// 	`select CBXDMX.pkg_toolkit_modified.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
+		// 	`select CBXDMX.pkg_cryption_tools.fnde('${encrypted_value}','${encrypt_key}') as encrypted from dual`
 		// );
 
 		// console.log(encryption1);
@@ -244,7 +245,7 @@ const dbQuery = async (query, callback) => {
 	} catch (error) {
 		console.error("Error adding row:", error);
 		res.status(500).json({ result: "Internal server error", code: "500" });
-		return
+		return;
 	}
 };
 
