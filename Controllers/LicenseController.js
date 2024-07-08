@@ -102,7 +102,7 @@ const getBankDetails = async (req, res) => {
 			res.status(result.status === "success" ? 200 : 300).json({
 				result:
 					result.status === "success" ? "Data retrieved" : "An error occurred",
-				data: result.status === "success" ? result.data : undefined,
+				message: result.status === "success" ? result.data : undefined,
 				code: result.status === "success" ? "200" : "300"
 			});
 			return;
@@ -234,8 +234,6 @@ const ammendLicenseDetails = async (req, res) => {
 		return;
 	}
 };
-
-
 
 //moves data from the main license table to the history table
 async function copyLicenseToHistory(bank_id) {
