@@ -90,7 +90,7 @@ const generateLicense = async (req, res) => {
 	}
 };
 
-//get bank details for reactivating license
+//get bank details for reactivating license//
 const getBankDetails = async (req, res) => {
 	try {
 		//select the current license details of the bank
