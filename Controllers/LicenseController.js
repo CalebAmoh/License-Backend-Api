@@ -235,6 +235,30 @@ const ammendLicenseDetails = async (req, res) => {
 	}
 };
 
+//get all licensed banks
+const getLicensedBanks = async(req,res) => {
+	try {
+		//select all the licensed banks
+		const query = `select bank_id,(select code_desc from parameters where id = bank_id) as bank_desc from tb_license where expired_status = 0 group by bank_id`;
+
+		//call select custom data helper function to perform query
+		selectCustomData(query, result => {
+			res.status(result.status === "success" ? 200 : 300).json({
+				result:
+					result.status === "success" ? "Data retrieved" : "An error occurred",
+				message: result.status === "success" ? result.data : undefined,
+				code: result.status === "success" ? "200" : "300"
+			});
+			return;
+		});
+	} catch (error) {
+		console.log(error);
+		res.satus(500).json({ status: "500", result: "Contact system admin" });
+		return;
+	}
+};
+
+
 //moves data from the main license table to the history table
 async function copyLicenseToHistory(bank_id) {
 	try {
@@ -295,9 +319,11 @@ async function copyLicenseToHistory(bank_id) {
 	}
 }
 
+
 module.exports = {
 	generateLicense,
 	getBankDetails,
 	reactivateLicense,
-	ammendLicenseDetails
+	ammendLicenseDetails,
+	getLicensedBanks
 };

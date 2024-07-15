@@ -12,7 +12,8 @@ const {
 	generateLicense,
 	getBankDetails,
 	reactivateLicense,
-	ammendLicenseDetails
+	ammendLicenseDetails,
+	getLicensedBanks
 } = require("../Controllers/LicenseController");
 const { validatorResponse } = require("../middleware/ValidatorResponse");
 const validationRules = require("../middleware/RequestValidator");
@@ -32,6 +33,7 @@ router.post("/generate-license",validationRules.generateLicense,validatorRespons
 router.post("/reactivate-license",validationRules.generateLicense,validatorResponse,reactivateLicense);
 router.put("/amend-license-details",validationRules.generateLicense,validatorResponse,ammendLicenseDetails);
 router.post("/get-bank-details",validationRules.selectBankDetails,validatorResponse,getBankDetails);
+router.get("/get-licensed-banks", getLicensedBanks);
 
 router.all("*", (req, res) => {
 	res.status(403).json({ code: "404", message: "route not found" });
