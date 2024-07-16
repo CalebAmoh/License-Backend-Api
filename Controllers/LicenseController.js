@@ -239,7 +239,7 @@ const ammendLicenseDetails = async (req, res) => {
 const getLicensedBanks = async(req,res) => {
 	try {
 		//select all the licensed banks
-		const query = `select bank_id,(select code_desc from parameters where id = bank_id) as bank_desc from tb_license where expired_status = 0 group by bank_id`;
+		const query = `select bank_id,(select code_desc from parameters where id = bank_id) as bank_desc,"Active" as status from tb_license where expired_status = 0 group by bank_id`;
 
 		//call select custom data helper function to perform query
 		selectCustomData(query, result => {
