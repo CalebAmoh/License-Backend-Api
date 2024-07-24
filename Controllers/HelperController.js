@@ -178,6 +178,28 @@ function selectData(tableName, callback) {
 	}
 }
 
+// Function to delete records in MySQL table dynamically based on a condition
+function deleteData(tableName, condition, callback) {
+	try {
+		//prepare delete query
+		const deleteRecord = `DELETE from ${tableName} WHERE ${condition}`;
+
+		//execute the delete query
+		connection.query(deleteRecord, (error, results, fields) => {
+			if (error) {
+				console.log("Data error !", error);
+				callback({ status: "error", message: error.sqlMessage });
+			} else {
+				callback({ status: "success", message: "data deleted" });
+			}
+		});
+	} catch (error) {
+		console.error("Error deleting data:", error);
+		res.status(500).json({ result: "Internal server error", code: "500" });
+		return;
+	}
+}
+
 // Function to select records in MySQL table dynamically based on your custom query
 function selectCustomData(query, callback) {
 	try {
@@ -257,5 +279,6 @@ module.exports = {
 	selectData,
 	selectCustomData,
 	encryptData,
-	dbQuery
+	dbQuery,
+	deleteData
 };

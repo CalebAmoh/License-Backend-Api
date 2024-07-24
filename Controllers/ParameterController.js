@@ -93,6 +93,31 @@ const getAllParam = async (req, res) => {
 	}
 };
 
+//delete parameter
+const deleteParam = async (req, res) => {
+	try {
+		//get the code type from request
+		const id = req.query.id;
+
+		//select condition
+		const condition = `id = ${id}`;
+
+		//call the deletedata helper function to delete parameter from db
+		deleteData(tb_parameter, condition, result => {
+			//return a success message if deletion is successful else error message
+			if (result.status === "success") {
+				console.log(result);
+				res.status(200).json({ result: "Data deleted", code: "200" });
+			} else {
+				res.status(300).json({ result: "An error occured", code: "300" });
+			}
+		});
+	} catch (error) {
+		console.error("Error:", error.message);
+		res.status(400).json({ status: "400", errors: error.message });
+	}
+};
+
 //this function will get all parameters for license generation form
 // Function to fetch parameters by code type
 async function fetchParametersByType(codeType) {
