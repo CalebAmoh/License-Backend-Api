@@ -5,7 +5,8 @@ const {
 	selectDataWithCondition,
 	selectParaWithCondition,
 	selectData,
-	updateData
+	updateData,
+	deleteData
 } = require("./HelperController");
 
 /***********************************************************************************************************
