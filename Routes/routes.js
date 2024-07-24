@@ -6,7 +6,8 @@ const {
 	getParam,
 	getLicenseFormParameters,
 	getAllParam,
-	updateParam
+	updateParam,
+	deleteParam
 } = require("../Controllers/ParameterController");
 const {
 	generateLicense,
@@ -27,6 +28,7 @@ router.put("/update-param",validationRules.updateParam,validatorResponse,updateP
 router.get("/get-param",validationRules.selectParam,validatorResponse,getParam);
 router.get("/get-all-param", getAllParam);
 router.get("/get-license-parameters",getLicenseFormParameters);
+router.delete("/delete-param",validationRules.deleteParam,validatorResponse,deleteParam);
 
 //handles license activities
 router.post("/generate-license",validationRules.generateLicense,validatorResponse,generateLicense);

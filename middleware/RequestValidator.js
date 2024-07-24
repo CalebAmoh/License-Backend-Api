@@ -48,6 +48,11 @@ const validationRules = {
 		check("bank_id").trim().notEmpty().withMessage("bank id is required")
 	],
 
+	//validation for deleting parameters from tb_parameters
+	deleteParam: [
+		check("id").trim().notEmpty().withMessage("id is required")
+	],
+
 	//validation for generating license
 	generateLicense: [
 		check("bank_id").trim().notEmpty().withMessage("bank id is required"),

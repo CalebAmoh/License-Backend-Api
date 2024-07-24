@@ -180,5 +180,6 @@ module.exports = {
 	getParam,
 	getLicenseFormParameters,
 	getAllParam,
-	updateParam
+	updateParam,
+	deleteParam
 };
