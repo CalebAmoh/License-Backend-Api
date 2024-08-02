@@ -139,8 +139,17 @@ const reactivateLicense = async (req, res) => {
 		} = req.body;
 
 		// Format request body into a string for encryption
-		const formattedString = Object.entries(req.body)
-			.map(([key, value]) => `${key}:${value}`)
+		const formattedString = [
+			"bank_desc",
+			"license_frequency_desc",
+			"license_type_desc",
+			"start_date",
+			"end_date",
+			"notification_start",
+			"notification_frequency_desc",
+			"grace_period"
+		]
+			.map((key, i) => `${key}:${req.body[key]}`)
 			.join(",");
 
 		// Encrypt the formatted string
