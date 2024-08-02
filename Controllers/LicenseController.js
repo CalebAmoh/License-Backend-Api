@@ -30,23 +30,26 @@ const generateLicense = async (req, res) => {
 			bank_id,
 			bank_desc,
 			license_frequency_id,
+			license_frequency_desc,
 			license_type_id,
+			license_type_desc,
 			start_date,
 			end_date,
 			notification_start,
 			notification_frequency_id,
+			notification_frequency_desc,
 			grace_period
 		} = req.body;
 
 		//format the data to be encrypted
 		const formatted_string = [
 			"bank_desc",
-			"license_frequency_id",
-			"license_type_id",
+			"license_frequency_desc",
+			"license_type_desc",
 			"start_date",
 			"end_date",
 			"notification_start",
-			"notification_frequency_id",
+			"notification_frequency_desc",
 			"grace_period"
 		]
 			.map((key, i) => `${key}:${req.body[key]}`)
