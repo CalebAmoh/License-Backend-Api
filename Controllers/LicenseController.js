@@ -125,12 +125,16 @@ const reactivateLicense = async (req, res) => {
 		// Destructure request body to extract license details
 		const {
 			bank_id,
+			bank_desc,
 			license_frequency_id,
+			license_frequency_desc,
 			license_type_id,
+			license_type_desc,
 			start_date,
 			end_date,
 			notification_start,
 			notification_frequency_id,
+			notification_frequency_desc,
 			grace_period
 		} = req.body;
 
