@@ -28,6 +28,7 @@ const generateLicense = async (req, res) => {
 		//get all data from request
 		const {
 			bank_id,
+			bank_desc,
 			license_frequency_id,
 			license_type_id,
 			start_date,
@@ -39,7 +40,7 @@ const generateLicense = async (req, res) => {
 
 		//format the data to be encrypted
 		const formatted_string = [
-			"bank_id",
+			"bank_desc",
 			"license_frequency_id",
 			"license_type_id",
 			"start_date",
